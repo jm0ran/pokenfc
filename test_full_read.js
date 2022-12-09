@@ -24,7 +24,7 @@ async function read_blocks(reader){
             }
         }
         total_data = Buffer.concat(buffers)
-        console.log(total_data.toString())
+        console.log(`Read: ${total_data.toString()}`)
     }catch(err){
         console.log(err)
     }
@@ -65,21 +65,6 @@ async function write_blocks(reader, string){
     }
 }
 
-// async function read_blocks(blocks, reader){
-//     total_data = Buffer.alloc(0)
-//     //Going to have to create a variable to hold data up here
-//     for(let i = lower_sector; i <= upper_sector; i++){
-//         await reader.authenticate((i - 1) * 4, key_type, key)
-//         for(let j = (i - 1) * 4; j < i * 4 - 1; j++){ //This gives us only valid block numbers in a mifare classic 1k card
-//             data = await reader.read(j, 16, 16)
-//             total_data = Buffer.concat([total_data, data])
-//         }
-//     }
-//     //Convert and return the data down here
-//     console.log(total_data)
-//     test_data = Buffer.from("Hello World", "utf-8")
-//     console.log(test_data)
-// }
 
 
 nfc.on('reader', async reader => {
