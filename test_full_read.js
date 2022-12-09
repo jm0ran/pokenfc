@@ -13,21 +13,17 @@ const lower_sector = 3
 const upper_sector = 4
 
 async function read_blocks(reader){
+    buffers = Array()
     try{
-        total_data = Buffer.alloc(16 * (upper_sector - lower_sector + 1) * 3)
-        buffer_index = 0
         //Going to have to create a variable to hold data up here
         for(let i = lower_sector; i <= upper_sector; i++){
             await reader.authenticate((i - 1) * 4, key_type, key)
             for(let j = (i - 1) * 4; j < i * 4 - 1; j++){ //This gives us only valid block numbers in a mifare classic 1k card
                 data = await reader.read(j, 16, 16)
-                //Iterate through each piece of data and add it to the larger object
-                for(let m = 0; m < data.length; m ++){
-                    total_data[buffer_index] = data[m]
-                    buffer_index += 1
-                }
+                buffers.push(data)
             }
         }
+        total_data = Buffer.concat(buffers)
         console.log(total_data.toString())
     }catch(err){
         console.log(err)
@@ -48,7 +44,7 @@ async function write_blocks(reader, string){
                 //For every block we want to construct a 16 byte buffer to write to it
                 data = Buffer.alloc(16)
                 for(let m = 0; m < 16; m ++){
-                    if(buffer_index < data.length){
+                    if(buffer_index < total_data.length){
                         data[m] = total_data[buffer_index]
                         buffer_index += 1
                     }else{
@@ -56,9 +52,9 @@ async function write_blocks(reader, string){
                     }
                 }
                 await reader.write(j, data, 16);
-                console.log("wrote")
             }
         }
+        console.log(`Wrote: ${total_data.toString()}`)
         // console.log(total_data.length)
         // //Convert and return the data down here
         // // console.log(total_data)
@@ -97,7 +93,7 @@ nfc.on('reader', async reader => {
             return
         }
         read_blocks(reader)
-        // write_blocks(reader, "Hello World!")
+        write_blocks(reader, "Property of Joseph Dearg Moran")
     })
 
     reader.on("error", err => {
